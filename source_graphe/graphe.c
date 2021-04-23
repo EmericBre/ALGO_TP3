@@ -9,6 +9,20 @@
 #include <limits.h>
 
 #include "graphe.h"
+#include "pile.h"
+#include "file.h"
+
+int appartient_tableau(psommet_t *tableau, psommet_t p, pgraphe_t g)
+{
+  for (int i = 0; i < nombre_sommets(g); i++)
+  {
+    if (tableau[i] == p)
+    {
+      return 1;
+    }
+  }
+  return 0;
+}
 
 psommet_t chercher_sommet(pgraphe_t g, int label)
 {
@@ -165,54 +179,45 @@ int colorier_graphe(pgraphe_t g)
 void afficher_graphe_largeur(pgraphe_t g, int r)
 {
   psommet_t p = g;
-  while (p->label != r) {
+  while (p->label != r)
+  {
     p = p->sommet_suivant;
   }
 
-  if (p == NULL) {
+  if (p == NULL)
+  {
     printf("Le sommet demandé n'est pas dans le graphe.\n");
     return;
   }
 
+  pfile_t file = creer_file();
   psommet_t sommetsvisites[nombre_sommets(g)];
+  sommetsvisites[0] = p;
   int j = 1;
   parc_t a;
-  int verif = 0;
-  sommetsvisites[0] = p;
 
-  a = p->liste_arcs;
-  while (a != NULL) {
-    sommetsvisites[j] = a->dest;
-    j++;
-    a = a->arc_suivant;
-  }
+  enfiler(file, p);
 
-  int h = 1;
-  for (int i = 1; i < nombre_sommets(g); i++) {
-    p = sommetsvisites[h];
+  while (file_vide(file) == 0)
+  {
+    p = defiler(file);
+
+    printf("%d ", p->label);
+
     a = p->liste_arcs;
-    while (a != NULL) {
-      verif = 0;
-      for (int k = 0; k < nombre_sommets(g); k++) {
-        if (sommetsvisites[k] == a->dest) {
-          verif = 1;
-          break;
-        }
-      }
-      if (verif == 0) {
+
+    while (a != NULL)
+    {
+      if (appartient_tableau(sommetsvisites, a->dest, g) == 0)
+      {
+        enfiler(file, a->dest);
         sommetsvisites[j] = a->dest;
         j++;
       }
       a = a->arc_suivant;
     }
-    h++;
   }
 
-  for (int i = 0; i < nombre_sommets(g); i++) {
-    if (chercher_sommet(g, sommetsvisites[i]->label)) {
-      printf("%d ", sommetsvisites[i]->label);
-    }
-  }
   printf("\n");
 
   return;
@@ -220,9 +225,53 @@ void afficher_graphe_largeur(pgraphe_t g, int r)
 
 void afficher_graphe_profondeur(pgraphe_t g, int r)
 {
-  /*
-    afficher les sommets du graphe avec un parcours en profondeur
-  */
+  psommet_t p = g;
+  while (p->label != r)
+  {
+    p = p->sommet_suivant;
+  }
+
+  if (p == NULL)
+  {
+    printf("Le sommet demandé n'est pas dans le graphe.\n");
+    return;
+  }
+
+  ppile_t pile = creer_pile();
+  psommet_t sommetsvisites[nombre_sommets(g)];
+  sommetsvisites[0] = p;
+  int j = 1;
+  int k = j;
+  parc_t a;
+
+  empiler(pile, p);
+
+  while (pile_vide(pile) == 0)
+  {
+    p = depiler(pile);
+
+    printf("%d ", p->label);
+
+    a = p->liste_arcs;
+    k = j;
+
+    while (a != NULL)
+    {
+      if (appartient_tableau(sommetsvisites, a->dest, g) == 0)
+      {
+        sommetsvisites[j] = a->dest;
+        j++;
+      }
+      a = a->arc_suivant;
+    }
+
+    for (int i = j - 1; i > k - 1; i--)
+    {
+      empiler(pile, sommetsvisites[i]);
+    }
+  }
+
+  printf("\n");
 
   return;
 }
@@ -246,6 +295,30 @@ int degre_sortant_sommet(pgraphe_t g, psommet_t s)
     du sommet n dans le graphe g
   */
 
+  if (g != NULL)
+  {
+
+    psommet_t p = g;
+    while (p != s)
+    {
+      p = p->sommet_suivant;
+    }
+
+    if (p == NULL)
+    {
+      printf("Le sommet demandé n'est pas dans le graphe.\n");
+      return 0;
+    }
+
+    int dss = 0;                //degré sortant du sommet
+    parc_t arc = s->liste_arcs; //on prend le premier arc
+    while (arc != NULL)
+    {
+      dss++;
+      arc = arc->arc_suivant;
+    }
+    return dss;
+  }
   return 0;
 }
 
@@ -256,6 +329,55 @@ int degre_entrant_sommet(pgraphe_t g, psommet_t s)
     dans le noeud n dans le graphe g
   */
 
+  if (g != NULL)
+  {
+
+    psommet_t p = g;
+    while (p != s)
+    {
+      p = p->sommet_suivant;
+    }
+
+    if (p == NULL)
+    {
+      printf("Le sommet demandé n'est pas dans le graphe.\n");
+      return 0;
+    }
+
+    pfile_t file = creer_file();
+    psommet_t sommetsvisites[nombre_sommets(g)];
+    sommetsvisites[0] = p;
+    int j = 1;
+    parc_t a;
+    int des = 0;
+
+    enfiler(file, p);
+
+    while (file_vide(file) == 0)
+    {
+      p = defiler(file);
+
+      a = p->liste_arcs;
+
+      while (a != NULL)
+      {
+        if (appartient_tableau(sommetsvisites, a->dest, g) == 0)
+        {
+          enfiler(file, a->dest);
+          sommetsvisites[j] = a->dest;
+          j++;
+        }
+
+        if (a->dest == s)
+        {
+          des++;
+        }
+        a = a->arc_suivant;
+      }
+    }
+
+    return des;
+  }
   return 0;
 }
 
@@ -265,7 +387,24 @@ int degre_maximal_graphe(pgraphe_t g)
     Max des degres des sommets du graphe g
   */
 
-  return 0;
+  if (g == NULL)
+  {
+    return 0;
+  }
+
+  psommet_t p = g;
+  int maxDeg = degre_sortant_sommet(g, p);
+  p = p->sommet_suivant;
+  while (p != NULL)
+  {
+    int inter = degre_sortant_sommet(g, p);
+    if (inter > maxDeg)
+    {
+      maxDeg = inter;
+    }
+    p = p->sommet_suivant;
+  }
+  return maxDeg;
 }
 
 int degre_minimal_graphe(pgraphe_t g)
@@ -273,8 +412,24 @@ int degre_minimal_graphe(pgraphe_t g)
   /*
     Min des degres des sommets du graphe g
   */
+  if (g == NULL)
+  {
+    return 0;
+  }
 
-  return 0;
+  psommet_t p = g;
+  int minDeg = degre_sortant_sommet(g, p);
+  p = p->sommet_suivant;
+  while (p != NULL)
+  {
+    int inter = degre_sortant_sommet(g, p);
+    if (inter < minDeg)
+    {
+      minDeg = inter;
+    }
+    p = p->sommet_suivant;
+  }
+  return minDeg;
 }
 
 int independant(pgraphe_t g)
@@ -288,6 +443,15 @@ int complet(pgraphe_t g)
 {
   /* Toutes les paires de sommet du graphe sont jointes par un arc */
 
+  if (g == NULL)
+  {
+    return 0;
+  }
+
+  if (nombre_sommets(g)*(nombre_sommets(g)-1) == nombre_arcs(g)) {
+    return 1;
+  }
+
   return 0;
 }
 
@@ -299,7 +463,23 @@ int regulier(pgraphe_t g)
      renvoie 1 si le graphe est régulier, 0 sinon
   */
 
-  return 0;
+  if (g == NULL)
+  {
+    return 0;
+  }
+
+  psommet_t p = g;
+  int degre = degre_sortant_sommet(g, p);
+  p = p->sommet_suivant;
+
+  while (p != NULL) {
+    if (degre != degre_sortant_sommet(g, p)) {
+      return 0;
+    }
+    p = p->sommet_suivant;
+  }
+
+  return 1;
 }
 
 /*

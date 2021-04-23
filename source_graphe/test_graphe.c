@@ -37,5 +37,30 @@ int main (int argc, char **argv)
 
   ecrire_graphe_colorie (g) ;
 
+  printf("\nAffichage parcours en largeur : ");
   afficher_graphe_largeur(g, 5);
+
+  printf("\nAffichage parcours en profondeur : ");
+  afficher_graphe_profondeur(g, 5);
+
+  printf("\nNombre de degrés sortants : %d \n", degre_sortant_sommet(g, chercher_sommet(g, 3)));
+
+  printf("\nNombre de degrés entrants : %d \n", degre_entrant_sommet(g, chercher_sommet(g, 3)));
+
+  printf("\nDegré maximal pour un sommet de g : %d \n", degre_maximal_graphe(g));
+  printf("\nDegré minimal pour un sommet de g : %d \n", degre_minimal_graphe(g));
+
+  if (complet(g) == 1) {
+    printf("\nLe graphe est complet (tous les sommets sont liés à tous les autres)\n");
+  }
+  else {
+    printf("\nLe graphe n'est pas complet (tous les sommets ne sont pas liés à tous les autres)\n");
+  }
+
+  if (regulier(g) == 1) {
+    printf("\nLe graphe est régulier (tous les sommets ont le même degré)\n");
+  }
+  else {
+    printf("\nLe graphe n'est pas régulier (tous les sommets n'ont pas le même degré)\n");
+  }
 }
