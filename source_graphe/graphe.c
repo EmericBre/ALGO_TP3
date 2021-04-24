@@ -436,6 +436,20 @@ int independant(pgraphe_t g)
 {
   /* Les aretes du graphe n'ont pas de sommet en commun */
 
+  if (g == NULL)
+  {
+    return 0;
+  }
+
+  psommet_t p = g;
+
+  while (p != NULL) {
+    if (1 != degre_entrant_sommet(g, p)) {
+      return 0;
+    }
+    p = p->sommet_suivant;
+  }
+
   return 0;
 }
 
