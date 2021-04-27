@@ -63,4 +63,67 @@ int main (int argc, char **argv)
   else {
     printf("\nLe graphe n'est pas régulier (tous les sommets n'ont pas le même degré)\n");
   }
+
+
+
+  //-------------------------------------EXAMEN 2017 TESTS--------------------------------------------
+
+  printf("\nEXAMEN 2017 : TESTS DES FONCTIONS\n");
+
+  pchemin_t c = creer_chemin(g);
+  afficher_chemin(c);
+
+  printf("\n--> Chemin simple :");
+  if (simple(g, c))
+    printf(" Oui \n");
+  else
+    printf(" Non \n");
+
+  printf("\n--> Chemin elementaire :");
+  if (elementaire(g, c))
+    printf(" Oui \n");
+  else
+    printf(" Non \n");
+
+  printf("\n--> Chemin eulerien :");
+  if (eulerien(g, c))
+    printf(" Oui \n");
+  else
+    printf(" Non \n");
+
+  printf("\n--> Chemin hamiltonien :");
+  if (hamiltonien(g, c))
+    printf(" Oui \n");
+  else
+    printf(" Non \n");
+
+  printf("--> Graphe eulérien :");
+  if (graphe_eulerien(g))
+    printf(" Oui \n");
+  else
+    printf(" Non \n");
+
+  printf("--> Graphe hamiltonien :");
+  if (graphe_hamiltonien(g))
+    printf(" Oui \n");
+  else
+    printf(" Non \n");
+
+  // printf("--> Distance du chemin :");
+  // if (graphe_hamiltonien(g))
+  //   printf(" Oui \n");
+  // else
+  //   printf(" Non \n");
+
+  // printf("--> graphe hamiltonien :");
+  // if (graphe_hamiltonien(g))
+  //   printf(" Oui \n");
+  // else
+  //   printf(" Non \n");
+
+  // printf("--> graphe hamiltonien :");
+  // if (graphe_hamiltonien(g))
+  //   printf(" Oui \n");
+  // else
+  //   printf(" Non \n");
 }

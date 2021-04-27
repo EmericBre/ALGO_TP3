@@ -24,6 +24,18 @@ int appartient_tableau(psommet_t *tableau, psommet_t p, pgraphe_t g)
   return 0;
 }
 
+int appartient_tableau_arc(parc_t *tableau, parc_t p, pgraphe_t g)
+{
+  for (int i = 0; i < nombre_arcs(g); i++)
+  {
+    if (tableau[i] == p)
+    {
+      return 1;
+    }
+  }
+  return 0;
+}
+
 psommet_t chercher_sommet(pgraphe_t g, int label)
 {
   psommet_t s;
@@ -443,8 +455,10 @@ int independant(pgraphe_t g)
 
   psommet_t p = g;
 
-  while (p != NULL) {
-    if (1 != degre_entrant_sommet(g, p)) {
+  while (p != NULL)
+  {
+    if (1 != degre_entrant_sommet(g, p))
+    {
       return 0;
     }
     p = p->sommet_suivant;
@@ -462,7 +476,8 @@ int complet(pgraphe_t g)
     return 0;
   }
 
-  if (nombre_sommets(g)*(nombre_sommets(g)-1) == nombre_arcs(g)) {
+  if (nombre_sommets(g) * (nombre_sommets(g) - 1) == nombre_arcs(g))
+  {
     return 1;
   }
 
@@ -477,25 +492,343 @@ int regulier(pgraphe_t g)
      renvoie 1 si le graphe est régulier, 0 sinon
   */
 
-  if (g == NULL)
-  {
-    return 0;
-  }
-
-  psommet_t p = g;
-  int degre = degre_sortant_sommet(g, p);
-  p = p->sommet_suivant;
-
-  while (p != NULL) {
-    if (degre != degre_sortant_sommet(g, p)) {
-      return 0;
-    }
-    p = p->sommet_suivant;
-  }
-
-  return 1;
+  return (degre_maximal_graphe(g) == degre_minimal_graphe(g));
 }
 
 /*
   placer les fonctions de l'examen 2017 juste apres
 */
+
+int longueur_chemin(pchemin_t c)
+{
+  pchemin_t courant = c;
+  int i = 0;
+  while (courant != NULL)
+  {
+    i += courant->arc->poids;
+    courant = courant->suivant;
+  }
+  return i;
+}
+
+int destination(pchemin_t c)
+{
+  pchemin_t courant = c;
+  while (courant->suivant != NULL)
+  {
+    courant = courant->suivant;
+  }
+  return courant->arc->dest->label;
+}
+
+pchemin_t plus_court_chemin(pgraphe_t g, int x, int y)
+{
+  pchemin_t *chemins = malloc(sizeof(pchemin_t) * 20);
+
+  tab_chemin(chemins, g);
+
+  pchemin_t c = chemins[0];
+  int i = 1;
+  int min = 9999;
+  pchemin_t minchemin;
+
+  while (c != NULL)
+  {
+    if (c->start->label == x && destination(c) == y)
+    {
+      int lg = longueur_chemin(c);
+      if (lg < min)
+      {
+        min = lg;
+        minchemin = c;
+      }
+    }
+    c = chemins[i];
+    i++;
+  }
+
+  return minchemin;
+}
+
+int elementaire(pgraphe_t g, pchemin_t c)
+{
+  if (g != NULL && c != NULL)
+  {
+    psommet_t *sommetstrouves = malloc(sizeof(psommet_t) * nombre_sommets(g));
+
+    sommetstrouves[0] = c->start;
+    int j = 1;
+    while (c != NULL)
+    {
+      if (appartient_tableau(sommetstrouves, c->arc->dest, g) == 1)
+      {
+        return 0;
+      }
+      sommetstrouves[j] = c->arc->dest;
+      j++;
+      c = c->suivant;
+    }
+    return 1;
+  }
+  return 1;
+}
+
+int simple(pgraphe_t g, pchemin_t c)
+{
+  if (g != NULL && c != NULL)
+  {
+    parc_t *arcstrouves = malloc(sizeof(parc_t) * nombre_arcs(g));
+
+    arcstrouves[0] = c->arc;
+    int j = 1;
+    c = c->suivant;
+    while (c != NULL)
+    {
+      if (appartient_tableau_arc(arcstrouves, c->arc, g) == 1)
+      {
+        return 0;
+      }
+      arcstrouves[j] = c->arc;
+      j++;
+      c = c->suivant;
+    }
+    return 1;
+  }
+  return 1;
+}
+
+int eulerien(pgraphe_t g, pchemin_t c)
+{
+  if (g != NULL && c != NULL)
+  {
+    parc_t *arcstrouves = malloc(sizeof(parc_t) * nombre_arcs(g));
+
+    arcstrouves[0] = c->arc;
+    int j = 1;
+    c = c->suivant;
+    while (c != NULL)
+    {
+      if (appartient_tableau_arc(arcstrouves, c->arc, g) == 0)
+      {
+        arcstrouves[j] = c->arc;
+        j++;
+      }
+      c = c->suivant;
+    }
+
+    int compteur = 0;
+    while (arcstrouves[compteur] != NULL)
+    {
+      compteur++;
+    }
+    if (compteur == nombre_arcs(g))
+    {
+      return 1;
+    }
+    else
+    {
+      return 0;
+    }
+  }
+  return 1;
+}
+
+int hamiltonien(pgraphe_t g, pchemin_t c)
+{
+  if (g != NULL && c != NULL)
+  {
+    psommet_t *sommetstrouves = malloc(sizeof(psommet_t) * nombre_sommets(g));
+
+    sommetstrouves[0] = c->start;
+    int j = 1;
+    while (c != NULL)
+    {
+
+      if (appartient_tableau(sommetstrouves, c->arc->dest, g) == 0)
+      {
+        sommetstrouves[j] = c->arc->dest;
+        j++;
+      }
+      c = c->suivant;
+    }
+
+    int compteur = 0;
+    while (sommetstrouves[compteur] != NULL)
+    {
+      compteur++;
+    }
+    if (compteur == nombre_sommets(g))
+    {
+      return 1;
+    }
+    else
+    {
+      return 0;
+    }
+  }
+  return 1;
+}
+
+int graphe_eulerien(pgraphe_t g)
+{
+  pchemin_t *chemins = malloc(sizeof(pchemin_t) * 20);
+
+  tab_chemin(chemins, g);
+
+  pchemin_t c = chemins[0];
+  int i = 1;
+
+  while (c != NULL)
+  {
+    if (eulerien(g, c) == 0)
+    {
+      return 0;
+    }
+    c = chemins[i];
+    i++;
+  }
+
+  return 1;
+}
+
+int graphe_hamiltonien(pgraphe_t g)
+{
+  pchemin_t *chemins = malloc(sizeof(pchemin_t) * 20);
+
+  tab_chemin(chemins, g);
+
+  pchemin_t c = chemins[0];
+  int i = 1;
+
+  while (c != NULL)
+  {
+    if (hamiltonien(g, c) == 0)
+    {
+      return 0;
+    }
+    c = chemins[i];
+    i++;
+  }
+
+  return 1;
+}
+
+int distance(pgraphe_t g, int x, int y)
+{
+  return longueur_chemin(plus_court_chemin(g, x, y));
+}
+
+int excentricite(pgraphe_t g, int n)
+{
+  psommet_t current = g;
+  int max = 0;
+  int p;
+  while (current != NULL)
+  {
+    p = distance(g, n, current->label);
+    if (p > max)
+    {
+      max = p;
+    }
+    current = current->sommet_suivant;
+  }
+  return max;
+}
+
+int diametre(pgraphe_t g)
+{
+  psommet_t current = g;
+  int max = 0;
+  int p;
+  while (current != NULL)
+  {
+    p = excentricite(g, current->label);
+    if (p > max)
+    {
+      max = p;
+    }
+    current = current->sommet_suivant;
+  }
+  return max;
+}
+
+void afficher_chemin(pchemin_t c)
+{
+  pchemin_t courant = c;
+  while (courant != NULL)
+  {
+    printf(" -> %i ", courant->arc->dest->label);
+    courant = courant->suivant;
+  }
+}
+
+pchemin_t ajouter_arc_chemin(pchemin_t c, parc_t arc)
+{
+
+  pchemin_t nouveau = malloc(sizeof(pchemin_t));
+  pchemin_t courant;
+  nouveau->arc = arc;
+  nouveau->suivant = NULL;
+  if (c == NULL)
+    c = nouveau;
+  else
+  {
+    courant = c;
+    while (courant->suivant != NULL)
+      courant = courant->suivant;
+    courant->suivant = nouveau;
+    nouveau->start = courant->arc->dest;
+  }
+  return c;
+}
+
+//Créer le premier chemin du graphe g
+pchemin_t creer_chemin(pgraphe_t g)
+{
+  pchemin_t c = NULL;
+  psommet_t p = g;
+  parc_t a = p->liste_arcs;
+  while ((a != NULL) && (simple(g, c)))
+  {
+    c = ajouter_arc_chemin(c, a);
+    p = a->dest;
+    a = p->liste_arcs;
+  }
+
+  return c;
+}
+
+//Permet de créer un chemin à partir d'un arc
+pchemin_t creer_chemin_bis(pgraphe_t g, parc_t arc)
+{
+  pchemin_t c = NULL;
+  psommet_t p;
+  parc_t a = arc;
+  while ((a != NULL) && (simple(g, c)))
+  {
+    c = ajouter_arc_chemin(c, a);
+    p = a->dest;
+    a = p->liste_arcs;
+  }
+
+  return c;
+}
+
+//Rempli un tableau de tous les chemins possibles pour le graphe g
+void tab_chemin(pchemin_t *tab, pgraphe_t g)
+{
+  int i;
+  pgraphe_t p = g;
+  pchemin_t c = NULL;
+  while (p != NULL)
+  {
+    parc_t a = p->liste_arcs;
+    while ((a != NULL) && (simple(g, c)))
+    {
+      tab[i] = creer_chemin_bis(g, a);
+      i++;
+      a = a->arc_suivant;
+    }
+    p = p->sommet_suivant;
+  }
+}
