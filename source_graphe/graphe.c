@@ -14,24 +14,26 @@
 
 int appartient_tableau(psommet_t *tableau, psommet_t p, pgraphe_t g)
 {
-  for (int i = 0; i < nombre_sommets(g); i++)
-  {
+  int i = 0;
+  while (tableau[i] != NULL && i < nombre_sommets(g)) {
     if (tableau[i] == p)
     {
       return 1;
     }
+    i++;
   }
   return 0;
 }
 
 int appartient_tableau_arc(parc_t *tableau, parc_t p, pgraphe_t g)
 {
-  for (int i = 0; i < nombre_arcs(g); i++)
-  {
+  int i = 0;
+  while (tableau[i] != NULL && i < nombre_arcs(g)) {
     if (tableau[i] == p)
     {
       return 1;
     }
+    i++;
   }
   return 0;
 }
@@ -191,7 +193,7 @@ int colorier_graphe(pgraphe_t g)
 void afficher_graphe_largeur(pgraphe_t g, int r)
 {
   psommet_t p = g;
-  while (p->label != r)
+  while (p != NULL && p->label != r)
   {
     p = p->sommet_suivant;
   }
@@ -207,26 +209,39 @@ void afficher_graphe_largeur(pgraphe_t g, int r)
   sommetsvisites[0] = p;
   int j = 1;
   parc_t a;
+  int nbvisites = 1;
+  int size = nombre_sommets(g);
 
   enfiler(file, p);
 
-  while (file_vide(file) == 0)
-  {
-    p = defiler(file);
+  while (nbvisites <= size) {
+    if (file_vide(file) == 0) {
+      p = defiler(file);
+      nbvisites++;
 
-    printf("%d ", p->label);
+      printf("%d ", p->label);
 
-    a = p->liste_arcs;
+      a = p->liste_arcs;
 
-    while (a != NULL)
-    {
-      if (appartient_tableau(sommetsvisites, a->dest, g) == 0)
+      while (a != NULL)
       {
-        enfiler(file, a->dest);
-        sommetsvisites[j] = a->dest;
-        j++;
+        if (appartient_tableau(sommetsvisites, a->dest, g) == 0)
+        {
+          enfiler(file, a->dest);
+          sommetsvisites[j] = a->dest;
+          j++;
+        }
+        a = a->arc_suivant;
       }
-      a = a->arc_suivant;
+    }
+    else {
+      p = g;
+      while (appartient_tableau(sommetsvisites, p, g) == 1) {
+        p = p->sommet_suivant;
+      }
+      enfiler(file, p);
+      sommetsvisites[j] = p;
+      j++;
     }
   }
 
@@ -238,7 +253,7 @@ void afficher_graphe_largeur(pgraphe_t g, int r)
 void afficher_graphe_profondeur(pgraphe_t g, int r)
 {
   psommet_t p = g;
-  while (p->label != r)
+  while (p != NULL && p->label != r)
   {
     p = p->sommet_suivant;
   }
@@ -255,31 +270,44 @@ void afficher_graphe_profondeur(pgraphe_t g, int r)
   int j = 1;
   int k = j;
   parc_t a;
+  int nbvisites = 1;
+  int size = nombre_sommets(g);
 
   empiler(pile, p);
 
-  while (pile_vide(pile) == 0)
-  {
-    p = depiler(pile);
+  while (nbvisites <= size) {
+    if (pile_vide(pile) == 0) {
+      p = depiler(pile);
+      nbvisites++;
 
-    printf("%d ", p->label);
+      printf("%d ", p->label);
 
-    a = p->liste_arcs;
-    k = j;
+      a = p->liste_arcs;
+      k = j;
 
-    while (a != NULL)
-    {
-      if (appartient_tableau(sommetsvisites, a->dest, g) == 0)
+      while (a != NULL)
       {
-        sommetsvisites[j] = a->dest;
-        j++;
+        if (appartient_tableau(sommetsvisites, a->dest, g) == 0)
+        {
+          sommetsvisites[j] = a->dest;
+          j++;
+        }
+        a = a->arc_suivant;
       }
-      a = a->arc_suivant;
-    }
 
-    for (int i = j - 1; i > k - 1; i--)
-    {
-      empiler(pile, sommetsvisites[i]);
+      for (int i = j - 1; i > k - 1; i--)
+      {
+        empiler(pile, sommetsvisites[i]);
+      }
+    }
+    else {
+      p = g;
+      while (appartient_tableau(sommetsvisites, p, g) == 1) {
+        p = p->sommet_suivant;
+      }
+      empiler(pile, p);
+      sommetsvisites[j] = p;
+      j++;
     }
   }
 
@@ -288,12 +316,107 @@ void afficher_graphe_profondeur(pgraphe_t g, int r)
   return;
 }
 
+int min_d2(int *d, int *F, int size) // Fonction Auxiliaire
+{
+  int min = 9999;
+  int res = -1;
+  int i = 0;
+  while(i<size){
+    if(F[i] != -1){
+      if(d[F[i]-1] < min){
+        min = d[F[i]-1];
+        res = F[i]-1;
+      }
+    }
+  i++;
+  }
+  return res;
+}
+
+int tableau_vide(int *tab, int size) // Fonction Auxiliaire
+{
+  int i = 0;
+  while(i < size){
+    if(tab[i] != -1){
+      return 0;
+    }
+    i++;
+  }
+  return 1;
+}
+
 void algo_dijkstra(pgraphe_t g, int r)
 {
   /*
     algorithme de dijkstra
     des variables ou des chanmps doivent etre ajoutees dans les structures.
   */
+
+  psommet_t p = g;
+  while (p != NULL && p->label != r)
+  {
+    p = p->sommet_suivant;
+  }
+
+  if (p == NULL)
+  {
+    printf("Le sommet demandé n'est pas dans le graphe.\n");
+    return;
+  }
+
+  int size = nombre_sommets(g);
+  int *d = malloc(size * sizeof(int));
+  int F[size];
+
+  int i = 0;
+  for (int i = 0; i < size; i++) {
+    F[i] = i+1;
+    d[i] = 9999;
+  }
+
+  d[r-1] = 0;
+    
+  while(tableau_vide(F,size) == 0){
+    int position_min = min_d2(d,F,size);
+    if (position_min == -1) {
+      break;
+    }
+    psommet_t u = chercher_sommet(g,position_min+1);
+    F[position_min] = -1;
+
+    parc_t l = u->liste_arcs;
+
+    while (l != NULL)
+    {
+      //Relachement
+      if(d[l->dest->label-1] > d[u->label-1] + l->poids){
+        d[l->dest->label-1] = d[u->label-1] + l->poids;
+      }
+      //Relachement
+      l = l->arc_suivant;
+    }
+    
+  }
+
+  for (int i = 0; i < size; i++) {
+    if (F[i] != -1) {
+      d[i] = -1;
+    }
+  }
+  
+  
+  i = 0;
+  p = g;
+  while(i!=size){
+    if (d[i] == -1) {
+      printf("La distance entre le sommet de départ et le sommet %d est infini (sommet inatteignable) \n", p->label);
+    }
+    else {
+      printf("La distance entre le sommet de départ et le sommet %d est : %d \n", p->label, d[i]);
+    }
+    i++;
+    p = p->sommet_suivant;
+  }
 
   return;
 }
@@ -405,11 +528,11 @@ int degre_maximal_graphe(pgraphe_t g)
   }
 
   psommet_t p = g;
-  int maxDeg = degre_sortant_sommet(g, p);
+  int maxDeg = degre_sortant_sommet(g, p) + degre_entrant_sommet(g, p);
   p = p->sommet_suivant;
   while (p != NULL)
   {
-    int inter = degre_sortant_sommet(g, p);
+    int inter = degre_sortant_sommet(g, p) + degre_entrant_sommet(g, p);
     if (inter > maxDeg)
     {
       maxDeg = inter;
@@ -430,11 +553,11 @@ int degre_minimal_graphe(pgraphe_t g)
   }
 
   psommet_t p = g;
-  int minDeg = degre_sortant_sommet(g, p);
+  int minDeg = degre_sortant_sommet(g, p) + degre_entrant_sommet(g, p);
   p = p->sommet_suivant;
   while (p != NULL)
   {
-    int inter = degre_sortant_sommet(g, p);
+    int inter = degre_sortant_sommet(g, p) + degre_entrant_sommet(g, p);
     if (inter < minDeg)
     {
       minDeg = inter;

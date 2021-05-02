@@ -37,15 +37,24 @@ int main (int argc, char **argv)
 
   ecrire_graphe_colorie (g) ;
 
+  printf("\nEntrez le label du sommet par lequel vous voulez commencer les différents parcours : \n");
+
+  int sommet;
+
+  scanf("%d", &sommet);
+
   printf("\nAffichage parcours en largeur : ");
-  afficher_graphe_largeur(g, 5);
+  afficher_graphe_largeur(g, sommet);
 
   printf("\nAffichage parcours en profondeur : ");
-  afficher_graphe_profondeur(g, 5);
+  afficher_graphe_profondeur(g, sommet);
 
-  printf("\nNombre de degrés sortants : %d \n", degre_sortant_sommet(g, chercher_sommet(g, 3)));
+  printf("\nAlgo Dijkstra : \n");
+  algo_dijkstra(g, sommet);
 
-  printf("\nNombre de degrés entrants : %d \n", degre_entrant_sommet(g, chercher_sommet(g, 3)));
+  printf("\nNombre de degrés sortants du sommet donné : %d \n", degre_sortant_sommet(g, chercher_sommet(g, sommet)));
+
+  printf("\nNombre de degrés entrants du sommet donné : %d \n", degre_entrant_sommet(g, chercher_sommet(g, sommet)));
 
   printf("\nDegré maximal pour un sommet de g : %d \n", degre_maximal_graphe(g));
   printf("\nDegré minimal pour un sommet de g : %d \n", degre_minimal_graphe(g));
