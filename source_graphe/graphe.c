@@ -15,7 +15,8 @@
 int appartient_tableau(psommet_t *tableau, psommet_t p, pgraphe_t g)
 {
   int i = 0;
-  while (tableau[i] != NULL && i < nombre_sommets(g)) {
+  while (tableau[i] != NULL && i < nombre_sommets(g))
+  {
     if (tableau[i] == p)
     {
       return 1;
@@ -28,7 +29,8 @@ int appartient_tableau(psommet_t *tableau, psommet_t p, pgraphe_t g)
 int appartient_tableau_arc(parc_t *tableau, parc_t p, pgraphe_t g)
 {
   int i = 0;
-  while (tableau[i] != NULL && i < nombre_arcs(g)) {
+  while (tableau[i] != NULL && i < nombre_arcs(g))
+  {
     if (tableau[i] == p)
     {
       return 1;
@@ -214,8 +216,10 @@ void afficher_graphe_largeur(pgraphe_t g, int r)
 
   enfiler(file, p);
 
-  while (nbvisites <= size) {
-    if (file_vide(file) == 0) {
+  while (nbvisites <= size)
+  {
+    if (file_vide(file) == 0)
+    {
       p = defiler(file);
       nbvisites++;
 
@@ -234,9 +238,11 @@ void afficher_graphe_largeur(pgraphe_t g, int r)
         a = a->arc_suivant;
       }
     }
-    else {
+    else
+    {
       p = g;
-      while (appartient_tableau(sommetsvisites, p, g) == 1) {
+      while (appartient_tableau(sommetsvisites, p, g) == 1)
+      {
         p = p->sommet_suivant;
       }
       enfiler(file, p);
@@ -275,8 +281,10 @@ void afficher_graphe_profondeur(pgraphe_t g, int r)
 
   empiler(pile, p);
 
-  while (nbvisites <= size) {
-    if (pile_vide(pile) == 0) {
+  while (nbvisites <= size)
+  {
+    if (pile_vide(pile) == 0)
+    {
       p = depiler(pile);
       nbvisites++;
 
@@ -300,9 +308,11 @@ void afficher_graphe_profondeur(pgraphe_t g, int r)
         empiler(pile, sommetsvisites[i]);
       }
     }
-    else {
+    else
+    {
       p = g;
-      while (appartient_tableau(sommetsvisites, p, g) == 1) {
+      while (appartient_tableau(sommetsvisites, p, g) == 1)
+      {
         p = p->sommet_suivant;
       }
       empiler(pile, p);
@@ -321,14 +331,17 @@ int min_d2(int *d, int *F, int size) // Fonction Auxiliaire
   int min = 9999;
   int res = -1;
   int i = 0;
-  while(i<size){
-    if(F[i] != -1){
-      if(d[F[i]-1] < min){
-        min = d[F[i]-1];
-        res = F[i]-1;
+  while (i < size)
+  {
+    if (F[i] != -1)
+    {
+      if (d[F[i] - 1] < min)
+      {
+        min = d[F[i] - 1];
+        res = F[i] - 1;
       }
     }
-  i++;
+    i++;
   }
   return res;
 }
@@ -336,8 +349,10 @@ int min_d2(int *d, int *F, int size) // Fonction Auxiliaire
 int tableau_vide(int *tab, int size) // Fonction Auxiliaire
 {
   int i = 0;
-  while(i < size){
-    if(tab[i] != -1){
+  while (i < size)
+  {
+    if (tab[i] != -1)
+    {
       return 0;
     }
     i++;
@@ -369,19 +384,22 @@ void algo_dijkstra(pgraphe_t g, int r)
   int F[size];
 
   int i = 0;
-  for (int i = 0; i < size; i++) {
-    F[i] = i+1;
+  for (int i = 0; i < size; i++)
+  {
+    F[i] = i + 1;
     d[i] = 9999;
   }
 
-  d[r-1] = 0;
-    
-  while(tableau_vide(F,size) == 0){
-    int position_min = min_d2(d,F,size);
-    if (position_min == -1) {
+  d[r - 1] = 0;
+
+  while (tableau_vide(F, size) == 0)
+  {
+    int position_min = min_d2(d, F, size);
+    if (position_min == -1)
+    {
       break;
     }
-    psommet_t u = chercher_sommet(g,position_min+1);
+    psommet_t u = chercher_sommet(g, position_min + 1);
     F[position_min] = -1;
 
     parc_t l = u->liste_arcs;
@@ -389,29 +407,33 @@ void algo_dijkstra(pgraphe_t g, int r)
     while (l != NULL)
     {
       //Relachement
-      if(d[l->dest->label-1] > d[u->label-1] + l->poids){
-        d[l->dest->label-1] = d[u->label-1] + l->poids;
+      if (d[l->dest->label - 1] > d[u->label - 1] + l->poids)
+      {
+        d[l->dest->label - 1] = d[u->label - 1] + l->poids;
       }
       //Relachement
       l = l->arc_suivant;
     }
-    
   }
 
-  for (int i = 0; i < size; i++) {
-    if (F[i] != -1) {
+  for (int i = 0; i < size; i++)
+  {
+    if (F[i] != -1)
+    {
       d[i] = -1;
     }
   }
-  
-  
+
   i = 0;
   p = g;
-  while(i!=size){
-    if (d[i] == -1) {
+  while (i != size)
+  {
+    if (d[i] == -1)
+    {
       printf("La distance entre le sommet de départ et le sommet %d est infini (sommet inatteignable) \n", p->label);
     }
-    else {
+    else
+    {
       printf("La distance entre le sommet de départ et le sommet %d est : %d \n", p->label, d[i]);
     }
     i++;
@@ -644,12 +666,8 @@ int destination(pchemin_t c)
   return courant->arc->dest->label;
 }
 
-pchemin_t plus_court_chemin(pgraphe_t g, int x, int y)
+pchemin_t plus_court_chemin(pgraphe_t g, int x, int y, pchemin_t *chemins)
 {
-  pchemin_t *chemins = malloc(sizeof(pchemin_t) * 20);
-
-  tab_chemin(chemins, g);
-
   pchemin_t c = chemins[0];
   int i = 1;
   int min = 9999;
@@ -740,7 +758,7 @@ int eulerien(pgraphe_t g, pchemin_t c)
     }
 
     int compteur = 0;
-    while (arcstrouves[compteur] != NULL)
+    while (compteur < nombre_arcs(g) && arcstrouves[compteur] != NULL)
     {
       compteur++;
     }
@@ -766,7 +784,6 @@ int hamiltonien(pgraphe_t g, pchemin_t c)
     int j = 1;
     while (c != NULL)
     {
-
       if (appartient_tableau(sommetstrouves, c->arc->dest, g) == 0)
       {
         sommetstrouves[j] = c->arc->dest;
@@ -776,7 +793,7 @@ int hamiltonien(pgraphe_t g, pchemin_t c)
     }
 
     int compteur = 0;
-    while (sommetstrouves[compteur] != NULL)
+    while (compteur < nombre_sommets(g) && sommetstrouves[compteur] != NULL)
     {
       compteur++;
     }
@@ -792,12 +809,8 @@ int hamiltonien(pgraphe_t g, pchemin_t c)
   return 1;
 }
 
-int graphe_eulerien(pgraphe_t g)
+int graphe_eulerien(pgraphe_t g, pchemin_t *chemins)
 {
-  pchemin_t *chemins = malloc(sizeof(pchemin_t) * 20);
-
-  tab_chemin(chemins, g);
-
   pchemin_t c = chemins[0];
   int i = 1;
 
@@ -814,12 +827,8 @@ int graphe_eulerien(pgraphe_t g)
   return 1;
 }
 
-int graphe_hamiltonien(pgraphe_t g)
+int graphe_hamiltonien(pgraphe_t g, pchemin_t *chemins)
 {
-  pchemin_t *chemins = malloc(sizeof(pchemin_t) * 20);
-
-  tab_chemin(chemins, g);
-
   pchemin_t c = chemins[0];
   int i = 1;
 
@@ -836,19 +845,19 @@ int graphe_hamiltonien(pgraphe_t g)
   return 1;
 }
 
-int distance(pgraphe_t g, int x, int y)
+int distance(pgraphe_t g, int x, int y, pchemin_t *chemins)
 {
-  return longueur_chemin(plus_court_chemin(g, x, y));
+  return longueur_chemin(plus_court_chemin(g, x, y, chemins));
 }
 
-int excentricite(pgraphe_t g, int n)
+int excentricite(pgraphe_t g, int n, pchemin_t *chemins)
 {
   psommet_t current = g;
   int max = 0;
   int p;
   while (current != NULL)
   {
-    p = distance(g, n, current->label);
+    p = distance(g, n, current->label, chemins);
     if (p > max)
     {
       max = p;
@@ -858,14 +867,14 @@ int excentricite(pgraphe_t g, int n)
   return max;
 }
 
-int diametre(pgraphe_t g)
+int diametre(pgraphe_t g, pchemin_t *chemins)
 {
   psommet_t current = g;
   int max = 0;
   int p;
   while (current != NULL)
   {
-    p = excentricite(g, current->label);
+    p = excentricite(g, current->label, chemins);
     if (p > max)
     {
       max = p;
@@ -878,6 +887,10 @@ int diametre(pgraphe_t g)
 void afficher_chemin(pchemin_t c)
 {
   pchemin_t courant = c;
+  if (courant != NULL && courant->start != NULL)
+  {
+    printf(" Chemin : %i ", courant->start->label);
+  }
   while (courant != NULL)
   {
     printf(" -> %i ", courant->arc->dest->label);
@@ -885,7 +898,7 @@ void afficher_chemin(pchemin_t c)
   }
 }
 
-pchemin_t ajouter_arc_chemin(pchemin_t c, parc_t arc)
+pchemin_t ajouter_arc_chemin(pchemin_t c, parc_t arc, psommet_t origine)
 {
 
   pchemin_t nouveau = malloc(sizeof(pchemin_t));
@@ -893,7 +906,10 @@ pchemin_t ajouter_arc_chemin(pchemin_t c, parc_t arc)
   nouveau->arc = arc;
   nouveau->suivant = NULL;
   if (c == NULL)
+  {
     c = nouveau;
+    c->start = origine;
+  }
   else
   {
     courant = c;
@@ -903,55 +919,4 @@ pchemin_t ajouter_arc_chemin(pchemin_t c, parc_t arc)
     nouveau->start = courant->arc->dest;
   }
   return c;
-}
-
-//Créer le premier chemin du graphe g
-pchemin_t creer_chemin(pgraphe_t g)
-{
-  pchemin_t c = NULL;
-  psommet_t p = g;
-  parc_t a = p->liste_arcs;
-  while ((a != NULL) && (simple(g, c)))
-  {
-    c = ajouter_arc_chemin(c, a);
-    p = a->dest;
-    a = p->liste_arcs;
-  }
-
-  return c;
-}
-
-//Permet de créer un chemin à partir d'un arc
-pchemin_t creer_chemin_bis(pgraphe_t g, parc_t arc)
-{
-  pchemin_t c = NULL;
-  psommet_t p;
-  parc_t a = arc;
-  while ((a != NULL) && (simple(g, c)))
-  {
-    c = ajouter_arc_chemin(c, a);
-    p = a->dest;
-    a = p->liste_arcs;
-  }
-
-  return c;
-}
-
-//Rempli un tableau de tous les chemins possibles pour le graphe g
-void tab_chemin(pchemin_t *tab, pgraphe_t g)
-{
-  int i;
-  pgraphe_t p = g;
-  pchemin_t c = NULL;
-  while (p != NULL)
-  {
-    parc_t a = p->liste_arcs;
-    while ((a != NULL) && (simple(g, c)))
-    {
-      tab[i] = creer_chemin_bis(g, a);
-      i++;
-      a = a->arc_suivant;
-    }
-    p = p->sommet_suivant;
-  }
 }

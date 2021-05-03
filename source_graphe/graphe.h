@@ -50,7 +50,7 @@ int nombre_arcs (pgraphe_t g) ;
 
 int nombre_sommets (pgraphe_t g) ;
 
-void lire_graphe (char * file_name, pgraphe_t *g) ;
+void lire_graphe (char * file_name, pgraphe_t *g, pchemin_t *chemins) ;
 
 void ecrire_graphe (psommet_t p) ;
 
@@ -89,17 +89,11 @@ int longueur_chemin(pchemin_t c) ;
 
 int destination(pchemin_t c) ;
 
-pchemin_t plus_court_chemin(pgraphe_t g, int x, int y) ;
+pchemin_t plus_court_chemin(pgraphe_t g, int x, int y, pchemin_t *chemins) ;
 
 void afficher_chemin(pchemin_t c) ;
 
-pchemin_t ajouter_arc_chemin(pchemin_t c, parc_t arc) ;
-
-pchemin_t creer_chemin(pgraphe_t g) ;
-
-pchemin_t creer_chemin_bis(pgraphe_t g, parc_t arc) ;
-
-void tab_chemin(pchemin_t *tab, pgraphe_t g) ;
+pchemin_t ajouter_arc_chemin(pchemin_t c, parc_t arc, psommet_t origine) ;
 
 int elementaire (pgraphe_t g, pchemin_t c);
 
@@ -109,12 +103,12 @@ int eulerien (pgraphe_t g, pchemin_t c);
 
 int hamiltonien (pgraphe_t g, pchemin_t c);
 
-int graphe_eulerien (pgraphe_t g);
+int graphe_eulerien (pgraphe_t g, pchemin_t *chemins);
 
-int graphe_hamiltonien (pgraphe_t g);
+int graphe_hamiltonien (pgraphe_t g, pchemin_t *chemins);
 
-int distance (pgraphe_t g, int x, int y);
+int distance (pgraphe_t g, int x, int y, pchemin_t *chemins);
 
-int excentricite (pgraphe_t g, int n);
+int excentricite (pgraphe_t g, int n, pchemin_t *chemins);
 
-int diametre (pgraphe_t g);
+int diametre (pgraphe_t g, pchemin_t *chemins);
